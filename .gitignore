@@ -1,0 +1,11 @@
+target/
+debug/
+
+# Don't commit puzzle inputs
+input/**/*.txt
+!input/.gitkeep
+!input/**/.gitkeep
+
+# Don't commit env files
+.env
+
