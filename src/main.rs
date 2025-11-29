@@ -54,6 +54,7 @@ fn list_solutions(year: Option<u16>) -> Result<()> {
         }
 
         println!("Days: {}", day_range.join(", "));
+        println!("\n");
     }
     Ok(())
 }

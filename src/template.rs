@@ -14,18 +14,16 @@ pub fn create_day_file(year: u16, day: u8) -> Result<()> {
 
     let template = generate_template(year, day);
 
-    fs::write(&solution_path, template).context("Failed to write solution file: ")?;
+    fs::write(&solution_path, template).context("Failed to write solution file. If this failed because it's a new year, manually create the folders first. New years must also be manually registered in the lib.")?;
 
     let input_path = PathBuf::from(format!("input/year{}/day{:02}.txt", year, day));
-    fs::write(&input_path, "").context("Failed to create empty input file: ")?;
+    fs::write(&input_path, "").context("Failed to create empty input file. If this failed because it's a new year, manually create the folders first. New years must also be manually registered in the lib")?;
 
     println!(
         "Created new solution file for year {} and day {:02}",
         year, day
     );
     println!("Next you must register the day in the year{}.rs file", year);
-    println!("If this failed because it's a new year, manually create the folders first");
-    println!("New years must also be manually registered in the lib");
 
     Ok(())
 }

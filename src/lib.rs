@@ -3,6 +3,7 @@ use std::path::PathBuf;
 
 pub mod template;
 pub mod year2024;
+pub mod year2025;
 
 pub fn get_input_path(year: u16, day: u8) -> PathBuf {
     PathBuf::from(format!("input/year{}/day{:02}.txt", year, day))
@@ -46,6 +47,7 @@ impl Solutions {
     pub fn get_solver(year: u16, day: u8) -> Option<SolverFn> {
         match year {
             2024 => Self::get_year_sols(year2024::SOLUTIONS, day),
+            2025 => Self::get_year_sols(year2025::SOLUTIONS, day),
             _ => None,
         }
     }
@@ -57,12 +59,13 @@ impl Solutions {
     }
 
     pub fn list_years() -> Vec<u16> {
-        vec![2024]
+        vec![2024, 2025]
     }
 
     pub fn available_days(year: u16) -> Vec<u8> {
         let days = match year {
             2024 => &year2024::SOLUTIONS,
+            2025 => &year2025::SOLUTIONS,
             _ => return vec![],
         };
 
