@@ -1,6 +1,7 @@
 use crate::load_input;
 use anyhow::Result;
 use itertools::{Itertools, repeat_n};
+use std::ops::ControlFlow;
 
 pub fn solve() -> Result<()> {
     let input = load_input(2024, 7)?;
@@ -25,18 +26,29 @@ fn solve_part1(input: &str) -> usize {
             .collect();
 
         for ops in all_op_combos.into_iter() {
-            let total = ops.iter().zip(parsed_vals.iter().skip(1)).fold(
+            let total = ops.iter().zip(parsed_vals.iter().skip(1)).try_fold(
                 parsed_vals[0],
-                |acc, (op, val)| match op {
-                    '*' => acc * val,
-                    '+' => acc + val,
-                    _ => panic!("Invalid operator"),
+                |acc, (op, val)| {
+                    if acc > parsed_target {
+                        ControlFlow::Break(acc)
+                    } else {
+                        match op {
+                            '*' => ControlFlow::Continue(acc * val),
+                            '+' => ControlFlow::Continue(acc + val),
+                            _ => ControlFlow::Break(acc),
+                        }
+                    }
                 },
             );
 
-            if total == parsed_target {
+            let result: Option<usize> = match total {
+                ControlFlow::Continue(val) => Some(val),
+                ControlFlow::Break(_) => None,
+            };
+
+            if result == Some(parsed_target) {
                 // println!("target {} nums {:?} ops {:?}", target, parsed_vals, ops);
-                output += total;
+                output += result.unwrap();
                 break;
             }
         }
@@ -56,8 +68,8 @@ fn concat(a: usize, b: usize) -> usize {
     a * 10_usize.pow(exp) + b
 }
 
-fn solve_part2(input: &str) -> u64 {
-    let mut output: u64 = 0;
+fn solve_part2(input: &str) -> usize {
+    let mut output: usize = 0;
     for line in input.lines() {
         let (target, vals) = line.split_once(":").unwrap();
         let parsed_target = target.parse::<usize>().unwrap();
@@ -70,25 +82,30 @@ fn solve_part2(input: &str) -> u64 {
             .collect();
 
         for ops in all_op_combos.into_iter() {
-            // if parsed_target == 1010417 {
-            //     println!("Trying {:?}", ops);
-            // }
-            let total = ops.iter().zip(parsed_vals.iter().skip(1)).fold(
+            let total = ops.iter().zip(parsed_vals.iter().skip(1)).try_fold(
                 parsed_vals[0],
-                |acc, (op, val)| match op {
-                    '*' => acc * val,
-                    '+' => acc + val,
-                    'l' => concat(acc, *val),
-                    _ => panic!("Invalid operator"),
+                |acc, (op, val)| {
+                    if acc > parsed_target {
+                        ControlFlow::Break(acc)
+                    } else {
+                        match op {
+                            '*' => ControlFlow::Continue(acc * val),
+                            '+' => ControlFlow::Continue(acc + val),
+                            'l' => ControlFlow::Continue(concat(acc, *val)),
+                            _ => ControlFlow::Break(acc),
+                        }
+                    }
                 },
             );
-            // if parsed_target == 1010417 {
-            //     println!("Got {}", total);
-            // }
 
-            if total == parsed_target {
+            let result: Option<usize> = match total {
+                ControlFlow::Continue(val) => Some(val),
+                ControlFlow::Break(_) => None,
+            };
+
+            if result == Some(parsed_target) {
                 // println!("target {} nums {:?} ops {:?}", target, parsed_vals, ops);
-                output += total as u64;
+                output += result.unwrap();
                 break;
             }
         }
@@ -132,4 +149,3 @@ mod tests {
         assert_eq!(1010, t3);
     }
 }
-
