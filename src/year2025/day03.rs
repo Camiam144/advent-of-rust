@@ -10,52 +10,39 @@ pub fn solve() -> Result<()> {
     Ok(())
 }
 
-fn solve_part1(input: &str) -> i32 {
+fn sum_batts(bank: &[u8], num_batts: usize) -> u64 {
+    // let mut sum = 0;
+    let mut monostack: Vec<u8> = Vec::new();
+    monostack.push(bank[0]);
+
+    for (idx, batt) in bank.iter().enumerate().skip(1) {
+        // What do we need? A decreasing monostack where the sum of the remaining
+        // bank elements and the sum of the empty stack elements is greater than
+        // or equal to the batteries required and the stack length is less than or
+        // equal to the number of batteries required?
+
+        let remaining = bank.len() - idx;
+        while !monostack.is_empty()
+            && monostack.last().unwrap() < batt
+            && monostack.len() + remaining > num_batts
+        {
+            monostack.pop();
+        }
+
+        if monostack.len() < num_batts {
+            monostack.push(*batt);
+        }
+    }
+    monostack
+        .iter()
+        .rev()
+        .enumerate()
+        .fold(0, |acc, (n, &val)| acc + val as u64 * 10_u64.pow(n as u32))
+}
+
+fn solve_part1(input: &str) -> u64 {
     let puzz = parse_grid_char(input);
     let mut output = 0;
-
-    for bank in puzz {
-        let mut left = 0;
-        let mut right = 0;
-        let mut idx = 0;
-        let intbank = bank
-            .iter()
-            .map(|e| e.to_string().parse::<i32>().unwrap())
-            .collect::<Vec<i32>>();
-        for (i, elem) in intbank.iter().take(intbank.len() - 1).enumerate() {
-            if *elem > left {
-                left = *elem;
-                idx = i;
-            }
-        }
-
-        for elem in intbank.iter().skip(idx + 1) {
-            if *elem > right {
-                right = *elem;
-            }
-        }
-        output += left * 10 + right;
-    }
-    output
-}
-
-fn remove_right_smallest<T: std::cmp::PartialOrd>(invec: &mut Vec<T>) {
-    let mut midx = 0;
-
-    for i in (1..invec.len()).rev() {
-        if invec[i] < invec[i - 1] {
-            midx = i;
-            break;
-        }
-    }
-
-    invec.remove(midx);
-}
-
-fn solve_part2(input: &str) -> u64 {
-    let puzz = parse_grid_char(input);
-    let mut output: u64 = 0;
-    let seqlen = 12;
 
     let intpuzz = puzz
         .iter()
@@ -67,22 +54,28 @@ fn solve_part2(input: &str) -> u64 {
         .collect::<Vec<Vec<u8>>>();
 
     for bank in intpuzz {
-        let mut outdigits: Vec<u8> = bank[(bank.len() - seqlen)..].to_vec();
-        outdigits.reverse();
-        for elem in bank.iter().take(bank.len() - seqlen).rev() {
-            if elem >= outdigits.last().expect("Outdigits is empty!") {
-                // Remove leftmost smallest element
-                outdigits.push(*elem);
-                remove_right_smallest(&mut outdigits);
-            }
-        }
-        // Calculate the total
-        let out_num: u64 = outdigits
-            .iter()
-            .enumerate()
-            .fold(0, |acc, (n, &val)| acc + val as u64 * 10_u64.pow(n as u32));
+        let val = sum_batts(&bank, 2);
+        output += val;
+    }
+    output
+}
 
-        output += out_num;
+fn solve_part2(input: &str) -> u64 {
+    let puzz = parse_grid_char(input);
+    let mut output: u64 = 0;
+
+    let intpuzz = puzz
+        .iter()
+        .map(|v| {
+            v.iter()
+                .map(|c| c.to_string().parse::<u8>().unwrap())
+                .collect::<Vec<u8>>()
+        })
+        .collect::<Vec<Vec<u8>>>();
+
+    for bank in intpuzz {
+        let val = sum_batts(&bank, 12);
+        output += val;
     }
 
     output
@@ -108,4 +101,3 @@ mod tests {
         assert_eq!(ans, solve_part2(EXAMPLE));
     }
 }
-
