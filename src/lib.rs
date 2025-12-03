@@ -21,8 +21,7 @@ pub fn parse_grid_i32(input: &str) -> Vec<Vec<i32>> {
         .lines()
         .filter(|line| !line.trim().is_empty())
         .map(|line| {
-            line.trim()
-                .split_whitespace()
+            line.split_whitespace()
                 .map(|s| s.parse::<i32>().expect("Couldn't parse number"))
                 .collect()
         })
