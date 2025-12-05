@@ -38,6 +38,7 @@ fn can_access(puzz: &[Vec<char>], row: usize, col: usize) -> bool {
 
 fn solve_part1(input: &str) -> i32 {
     let puzz = parse_grid_char(input);
+    let start = std::time::Instant::now();
     let mut output = 0;
 
     for row in 0..puzz.len() {
@@ -52,6 +53,7 @@ fn solve_part1(input: &str) -> i32 {
             }
         }
     }
+    println!("Part 1 done in {} μs", start.elapsed().as_micros());
     output
 }
 
@@ -59,6 +61,7 @@ fn solve_part2(input: &str) -> i32 {
     // This will start with a brute force solution, eventually I will refactor
     // to something that only checks the next possible options
     let mut puzz = parse_grid_char(input);
+    let start = std::time::Instant::now();
     let mut output = 0;
     let mut has_removed = true;
 
@@ -79,6 +82,7 @@ fn solve_part2(input: &str) -> i32 {
             }
         }
     }
+    println!("Part 2 done in {} μs", start.elapsed().as_micros());
     output
 }
 
@@ -108,4 +112,3 @@ mod tests {
         assert_eq!(ans, solve_part2(EXAMPLE));
     }
 }
-
