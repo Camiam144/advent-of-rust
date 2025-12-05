@@ -3,10 +3,22 @@ use anyhow::Result;
 
 pub fn solve() -> Result<()> {
     let input = load_input(2025, 2)?;
+    let start = std::time::Instant::now();
     let part1 = solve_part1(&input);
-    println!("Day 2 part 1: {}", part1);
+    let p1 = std::time::Instant::now();
+    println!(
+        "Day DAY part 1: {} in {} μs",
+        part1,
+        (p1 - start).as_micros()
+    );
+    let start2 = std::time::Instant::now();
     let part2 = solve_part2(&input);
-    println!("Day 2 part 2: {}", part2);
+    let p2 = std::time::Instant::now();
+    println!(
+        "Day DAY part 2: {} in {} μs",
+        part2,
+        (p2 - start2).as_micros()
+    );
     Ok(())
 }
 
@@ -110,4 +122,3 @@ mod tests {
         assert_eq!(ans, solve_part2(EXAMPLE));
     }
 }
-
