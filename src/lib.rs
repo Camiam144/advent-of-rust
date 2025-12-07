@@ -34,7 +34,7 @@ pub fn parse_grid_char(input: &str) -> Vec<Vec<char>> {
         .lines()
         .filter(|line| !line.trim().is_empty())
         .map(|line| line.trim())
-        .map(|s| s.chars().collect())
+        .map(|s| s.trim().chars().collect())
         .collect()
 }
 
