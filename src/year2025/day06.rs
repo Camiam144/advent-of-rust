@@ -1,4 +1,4 @@
-use crate::{load_input, parse_grid_char};
+use crate::load_input;
 use anyhow::Result;
 
 pub fn solve() -> Result<()> {
