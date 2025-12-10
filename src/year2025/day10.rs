@@ -107,6 +107,7 @@ struct Joltage {
     stringrep: String,
 }
 
+#[allow(dead_code)]
 fn print_history(light: &Lights, button_path: &[&Button]) {
     let mut l = *light;
     println!("{}", l);
@@ -133,16 +134,11 @@ fn solve_part1(input: &str) -> usize {
     let mut output: usize = 0;
     for (target_light, buttons) in puzz {
         let mut seen_lights = HashSet::new();
-        let mut queue: VecDeque<(Lights, Vec<&Button>)> = VecDeque::new();
-        queue.push_back((
-            Lights {
-                val: 0,
-                num_bits: target_light.num_bits,
-            },
-            Vec::new(),
-        ));
-        while let Some((curr_light, button_path)) = queue.pop_front() {
-            if curr_light.val == target_light.val {
+        let mut queue: VecDeque<(u16, Vec<&Button>)> = VecDeque::new();
+        queue.push_back((0, Vec::new()));
+        seen_lights.insert(0_u16);
+        while let Some((curr_val, button_path)) = queue.pop_front() {
+            if curr_val == target_light.val {
                 output += button_path.len();
                 // Print here to see some viz
                 // println!("Solved in {} buttons", button_path.len(),);
@@ -155,18 +151,17 @@ fn solve_part1(input: &str) -> usize {
                 // );
                 break;
             }
-            if seen_lights.contains(&curr_light.val) {
-                continue;
-            }
-            // Stick our current lights in the hash set
-            seen_lights.insert(curr_light.val);
             // Push all the buttons!
+            // I know I could just pass the number of buttons pushed to make
+            // it faster, but passing the whole path lets us do viz at the end.
             for button in &buttons {
-                let mut newlight = curr_light;
-                newlight.val ^= button.val;
-                let mut new_path = button_path.clone();
-                new_path.push(button);
-                queue.push_back((newlight, new_path));
+                let new_val = curr_val ^ button.val;
+                // If we haven't seen the new val, add to the BFS.
+                if seen_lights.insert(new_val) {
+                    let mut new_path = button_path.clone();
+                    new_path.push(button);
+                    queue.push_back((new_val, new_path));
+                }
             }
         }
     }
