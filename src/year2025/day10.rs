@@ -7,6 +7,8 @@ use std::{
 use crate::load_input;
 use anyhow::Result;
 
+use good_lp::{Solution, SolverModel, constraint, default_solver, variables};
+
 pub fn solve() -> Result<()> {
     let input = load_input(2025, 10)?;
     let start = std::time::Instant::now();
@@ -103,7 +105,7 @@ impl FromStr for Button {
     }
 }
 
-struct Joltage {
+struct JoltageButton {
     stringrep: String,
 }
 
@@ -169,7 +171,18 @@ fn solve_part1(input: &str) -> usize {
 }
 
 fn solve_part2(input: &str) -> i32 {
-    // TODO: implementation
+    // let puzz: Vec<(Lights, Vec<Button>)> = input
+    //     .lines()
+    //     .map(|l| {
+    //         let (but, jolt) = l.rsplit_once(' ').unwrap();
+    //         let buttons: Vec<Button> = but
+    //             .split_ascii_whitespace()
+    //             .filter(|e| e.starts_with('('))
+    //             .filter_map(|e| e.parse::<Button>().ok())
+    //             .collect();
+    //         (buttons, buttons)
+    //     })
+    //     .collect();
     0
 }
 
@@ -192,4 +205,3 @@ mod tests {
         assert_eq!(ans, solve_part2(EXAMPLE));
     }
 }
-

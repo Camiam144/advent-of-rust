@@ -8,3 +8,5 @@ anyhow = "1.0.100"
 clap = { version = "4.5.53", features = ["derive"] }
 itertools = "0.14.0"
 regex = "1.12.2"
+good_lp = { version = "*", features = ["scip"], default-features = false}
+scip-sys = { version = "*", features = ["from-source"]}
