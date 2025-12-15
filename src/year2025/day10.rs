@@ -7,7 +7,7 @@ use std::{
 use crate::load_input;
 use anyhow::Result;
 
-use good_lp::{Solution, SolverModel, constraint, default_solver, variables};
+use good_lp::{Expression, Solution, SolverModel, constraint, default_solver, variable, variables};
 
 pub fn solve() -> Result<()> {
     let input = load_input(2025, 10)?;
@@ -105,10 +105,6 @@ impl FromStr for Button {
     }
 }
 
-struct JoltageButton {
-    stringrep: String,
-}
-
 #[allow(dead_code)]
 fn print_history(light: &Lights, button_path: &[&Button]) {
     let mut l = *light;
@@ -171,19 +167,61 @@ fn solve_part1(input: &str) -> usize {
 }
 
 fn solve_part2(input: &str) -> i32 {
-    // let puzz: Vec<(Lights, Vec<Button>)> = input
-    //     .lines()
-    //     .map(|l| {
-    //         let (but, jolt) = l.rsplit_once(' ').unwrap();
-    //         let buttons: Vec<Button> = but
-    //             .split_ascii_whitespace()
-    //             .filter(|e| e.starts_with('('))
-    //             .filter_map(|e| e.parse::<Button>().ok())
-    //             .collect();
-    //         (buttons, buttons)
-    //     })
-    //     .collect();
-    0
+    let puzz: Vec<(Vec<Vec<u32>>, Vec<u32>)> = input
+        .lines()
+        .map(|l| {
+            let (rest, jolt) = l.rsplit_once(' ').unwrap();
+            let (_, but) = rest.split_once(' ').unwrap();
+            let buttons: Vec<Vec<u32>> = but
+                .split_ascii_whitespace()
+                .map(|b| b.chars().filter_map(|c| c.to_digit(10)).collect())
+                .collect();
+            let joltages: Vec<u32> = jolt
+                .trim_matches(&['{', '}'] as &[_])
+                .split(',')
+                .map(|n| n.parse::<u32>().unwrap())
+                .collect();
+            (buttons, joltages)
+        })
+        .collect();
+    let mut output = 0;
+    for (buttons, joltages) in &puzz {
+        let max = joltages.iter().max().unwrap();
+        let num_vars = buttons.len();
+        variables! { problem: 0 <= b[num_vars] (integer) <= *max; };
+        let xvars: Vec<variable::Variable> = b.into_iter().collect();
+        let objective: Expression = xvars.iter().map(|&v| v * 1).sum();
+        let model = problem.minimise(objective).using(default_solver);
+        let mut constraints = Vec::with_capacity(joltages.len());
+
+        for (i, j) in joltages.iter().enumerate() {
+            let button_idxs: Vec<usize> = buttons
+                .iter()
+                .enumerate()
+                .filter(|&(_idx, v)| v.contains(&(i as u32)))
+                .map(|(idx, _v)| idx)
+                .collect();
+
+            let button_vars: Vec<variable::Variable> =
+                button_idxs.iter().map(|&i| xvars[i]).collect();
+            let this_expr: Expression = button_vars.iter().map(|&v| v * 1).sum();
+
+            constraints.push(constraint!(this_expr == *j));
+        }
+
+        let result = model.with_all(constraints).solve();
+
+        match result {
+            Ok(res) => {
+                let final_value: f64 = xvars.iter().map(|&x| res.value(x)).sum();
+                // println!("Solved Problem {}", final_value);
+                output += final_value as i32;
+            }
+            Err(_) => println!("Error with problem"),
+        }
+    }
+
+    output
 }
 
 #[cfg(test)]
@@ -201,7 +239,7 @@ mod tests {
     }
     #[test]
     fn test_part_two() {
-        let ans = 1;
+        let ans = 33;
         assert_eq!(ans, solve_part2(EXAMPLE));
     }
 }
