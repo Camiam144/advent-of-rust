@@ -1,5 +1,6 @@
 target/
 debug/
+.DS_Store
 
 # Don't commit puzzle inputs
 input/**/*.txt
